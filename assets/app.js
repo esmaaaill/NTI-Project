@@ -1,5 +1,44 @@
 const ready = (fn) => document.readyState !== 'loading' ? fn() : document.addEventListener('DOMContentLoaded', fn);
 
+// ---------- API + auth helpers ----------
+const API_BASE = `${window.location.origin}/api`;
+
+// Read and write auth tokens to localStorage so the UI can remember sessions between refreshes.
+const authStore = {
+  get token() {
+    return localStorage.getItem('qs_token');
+  },
+  set token(value) {
+    if (value) {
+      localStorage.setItem('qs_token', value);
+    } else {
+      localStorage.removeItem('qs_token');
+    }
+  },
+};
+
+// Display feedback inside a target element with a consistent style.
+const setStatus = (el, message, isError = false) => {
+  if (!el) return;
+  el.textContent = message;
+  el.className = `form-status ${isError ? 'error' : 'success'}`;
+};
+
+// Fetch wrapper used by the auth flows so error messages can be surfaced cleanly.
+const postJson = async (path, payload) => {
+  const response = await fetch(`${API_BASE}${path}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.message || 'Request failed');
+  }
+  return data;
+};
+
 const initSearchForm = () => {
   const form = document.querySelector('#searchForm');
   const output = document.querySelector('#searchResults');
@@ -93,6 +132,111 @@ const initBookingForm = () => {
   });
 };
 
+// Enable sign up, login, token verification, and logout actions against the demo backend.
+const initAuthFlows = () => {
+  const signupForm = document.querySelector('#signupForm');
+  const loginForm = document.querySelector('#loginForm');
+  const signupStatus = document.querySelector('#signupStatus');
+  const loginStatus = document.querySelector('#loginStatus');
+  const authStatus = document.querySelector('#authStatus');
+  const profileDetails = document.querySelector('#profileDetails');
+  const tokenStatus = document.querySelector('#tokenStatus');
+  const checkTokenBtn = document.querySelector('#checkToken');
+  const logoutBtn = document.querySelector('#logoutBtn');
+
+  if (!signupForm || !loginForm || !authStatus) return;
+
+  const renderProfile = (user) => {
+    if (!user) {
+      profileDetails.innerHTML = '';
+      authStatus.textContent = 'No account connected yet.';
+      tokenStatus.textContent = 'Token not requested';
+      return;
+    }
+
+    authStatus.textContent = `Signed in as ${user.name}`;
+    profileDetails.innerHTML = `
+      <div class="summary-row"><span>Email</span><strong>${user.email}</strong></div>
+      <div class="summary-row"><span>User ID</span><strong>${user.id}</strong></div>
+    `;
+  };
+
+  const verifyToken = async () => {
+    if (!authStore.token) {
+      tokenStatus.textContent = 'No token saved yet.';
+      tokenStatus.className = 'tag error';
+      return;
+    }
+    tokenStatus.textContent = 'Checking token…';
+    tokenStatus.className = 'tag';
+    try {
+      const response = await fetch(`${API_BASE}/auth/me`, {
+        headers: { Authorization: `Bearer ${authStore.token}` },
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || 'Token check failed');
+      tokenStatus.textContent = data.message;
+      tokenStatus.className = 'tag success';
+      renderProfile(data.user);
+    } catch (error) {
+      tokenStatus.textContent = error.message;
+      tokenStatus.className = 'tag error';
+    }
+  };
+
+  signupForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    setStatus(signupStatus, 'Creating your account…');
+    try {
+      const payload = Object.fromEntries(new FormData(signupForm));
+      const data = await postJson('/auth/signup', payload);
+      setStatus(signupStatus, data.message, false);
+      authStore.token = data.token;
+      renderProfile(data.user);
+      signupForm.reset();
+      verifyToken();
+    } catch (error) {
+      setStatus(signupStatus, error.message, true);
+    }
+  });
+
+  loginForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    setStatus(loginStatus, 'Signing you in…');
+    try {
+      const payload = Object.fromEntries(new FormData(loginForm));
+      const data = await postJson('/auth/login', payload);
+      setStatus(loginStatus, data.message, false);
+      authStore.token = data.token;
+      renderProfile(data.user);
+      loginForm.reset();
+      verifyToken();
+    } catch (error) {
+      setStatus(loginStatus, error.message, true);
+    }
+  });
+
+  checkTokenBtn?.addEventListener('click', (e) => {
+    e.preventDefault();
+    verifyToken();
+  });
+
+  logoutBtn?.addEventListener('click', (e) => {
+    e.preventDefault();
+    authStore.token = null;
+    renderProfile(null);
+    setStatus(loginStatus, 'Logged out.', false);
+    setStatus(signupStatus, '', false);
+    tokenStatus.textContent = 'Token cleared';
+    tokenStatus.className = 'tag';
+  });
+
+  // Auto-verify on load if we already have a token saved.
+  if (authStore.token) {
+    verifyToken();
+  }
+};
+
 const initContactForm = () => {
   const form = document.querySelector('#contactForm');
   const status = document.querySelector('#contactStatus');
@@ -142,6 +286,7 @@ ready(() => {
   initSearchForm();
   initCarousel();
   initBookingForm();
+  initAuthFlows();
   initContactForm();
   initReveal();
 });

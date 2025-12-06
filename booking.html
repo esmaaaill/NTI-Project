@@ -31,6 +31,57 @@
     <h1 class="section-title">Complete your booking</h1>
     <p class="section-subtitle">Tell us about your stay and we'll confirm instantly.</p>
 
+    <section class="auth-grid" aria-label="Account creation and login">
+      <article class="card form-card" data-reveal>
+        <h2>Sign up</h2>
+        <p class="section-subtitle">Create an account so your reservations stay linked to you.</p>
+        <form id="signupForm" class="stacked" aria-label="Sign up form">
+          <div class="field">
+            <label for="signupName">Full name</label>
+            <input id="signupName" name="name" type="text" required placeholder="Alex Traveler" />
+          </div>
+          <div class="field">
+            <label for="signupEmail">Email</label>
+            <input id="signupEmail" name="email" type="email" required placeholder="you@example.com" />
+          </div>
+          <div class="field">
+            <label for="signupPassword">Password</label>
+            <input id="signupPassword" name="password" type="password" required minlength="6" placeholder="At least 6 characters" />
+          </div>
+          <button type="submit" class="btn btn-primary">Create account</button>
+          <p id="signupStatus" class="form-status" aria-live="polite"></p>
+        </form>
+      </article>
+
+      <article class="card form-card" data-reveal>
+        <h2>Login</h2>
+        <p class="section-subtitle">Already have an account? Access it here.</p>
+        <form id="loginForm" class="stacked" aria-label="Login form">
+          <div class="field">
+            <label for="loginEmail">Email</label>
+            <input id="loginEmail" name="email" type="email" required placeholder="you@example.com" />
+          </div>
+          <div class="field">
+            <label for="loginPassword">Password</label>
+            <input id="loginPassword" name="password" type="password" required placeholder="Your password" />
+          </div>
+          <button type="submit" class="btn btn-primary">Login</button>
+          <p id="loginStatus" class="form-status" aria-live="polite"></p>
+        </form>
+      </article>
+
+      <article class="card sidebar" data-reveal id="profilePanel" aria-live="polite">
+        <h2>Session status</h2>
+        <p id="authStatus" class="section-subtitle">No account connected yet.</p>
+        <div class="summary-row" id="profileDetails"></div>
+        <div class="tag" id="tokenStatus">Token not requested</div>
+        <div class="rows" style="margin-top:12px; gap:10px;">
+          <button class="btn btn-primary" id="checkToken">Verify session</button>
+          <button class="btn" id="logoutBtn" type="button">Log out</button>
+        </div>
+      </article>
+    </section>
+
     <div class="split">
       <form id="bookingForm" class="card form-card" aria-label="Booking form">
         <div class="field">

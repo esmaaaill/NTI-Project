@@ -441,6 +441,27 @@ img {
   font-weight: 700;
 }
 
+.auth-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 18px;
+  margin: 22px 0 32px;
+}
+
+.stacked {
+  display: grid;
+  gap: 12px;
+}
+
+.form-status {
+  min-height: 24px;
+  font-weight: 600;
+}
+
+#profilePanel .rows .btn {
+  width: 100%;
+}
+
 @media (max-width: 900px) {
   .navbar .inner {
     flex-direction: column;

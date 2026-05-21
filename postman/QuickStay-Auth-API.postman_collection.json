@@ -1,0 +1,38 @@
+{
+  "info": {
+    "name": "QuickStay Auth API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Sign Up",
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "url": "{{baseUrl}}/api/auth/signup",
+        "body": {"mode": "raw", "raw": "{\n  \"name\": \"Jane\",\n  \"email\": \"jane@example.com\",\n  \"password\": \"Password123\"\n}"}
+      }
+    },
+    {
+      "name": "Login",
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "url": "{{baseUrl}}/api/auth/login",
+        "body": {"mode": "raw", "raw": "{\n  \"email\": \"jane@example.com\",\n  \"password\": \"Password123\"\n}"}
+      }
+    },
+    {
+      "name": "Me",
+      "request": {
+        "method": "GET",
+        "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+        "url": "{{baseUrl}}/api/auth/me"
+      }
+    }
+  ],
+  "variable": [
+    {"key": "baseUrl", "value": "http://localhost:3000"},
+    {"key": "token", "value": ""}
+  ]
+}

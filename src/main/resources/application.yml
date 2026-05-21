@@ -1,0 +1,8 @@
+server:
+  port: ${PORT:3000}
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:change-me-in-production-change-me-in-production}
+    expiration-hours: 24
+  users-file: ${USERS_FILE:data/users.json}

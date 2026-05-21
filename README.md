@@ -1,66 +1,61 @@
-# Quick Stay demo backend and UI
+# QuickStay - Spring Boot Authentication Portfolio Project
 
-This repository contains the Quick Stay marketing site plus a lightweight Express server that adds authentication and authorization basics. The backend intentionally stays file-based so it can run anywhere without a database while still letting you sign up with an email address, log in, and verify protected routes.
+## Project Title & High-Level Description
+QuickStay is a Java 21 and Spring Boot 3 backend application that powers authentication for a travel-booking themed frontend. The project demonstrates production-minded backend engineering fundamentals for junior Java roles: clean layered architecture, SOLID-oriented service boundaries, secure password handling, JWT-based stateless authentication, structured exception handling, and automated tests.
 
-## Features
-- **Static marketing pages** served directly from the repository root (`index.html`, `places.html`, `about.html`, etc.).
-- **Illustration-based hero/recommendation images** stored locally in `assets/images` so the homepage visuals always load without relying on third-party CDNs.
-- **Authentication API** with sign-up, login, and token verification powered by JSON Web Tokens (JWT).
-- **Demo session UI** on `booking.html` that lets you create an account, log in, verify your token, and log out. Tokens are persisted in `localStorage` for convenience.
-- **Accessible, documented JavaScript** (`assets/app.js`) with comments explaining each part of the client-side logic.
+## Tech Stack
+- **Language:** Java 21
+- **Framework:** Spring Boot 3.3
+- **Security:** Spring Security, BCrypt, JWT (jjwt)
+- **Validation:** Jakarta Bean Validation
+- **Persistence (Demo):** File-based JSON repository (`data/users.json`)
+- **Testing:** JUnit 5, Mockito, Spring MockMvc
+- **Build Tool:** Maven
 
-## Prerequisites
-- Node.js 18+ and npm installed on your machine.
-- Network access for npm to install dependencies.
+## Architecture Overview
+The backend follows a layered architecture:
+- **Controller Layer (`controller`)**: exposes REST endpoints and HTTP contract.
+- **Service Layer (`service`)**: business logic and orchestration.
+- **Repository Layer (`repository`)**: persistence abstraction (`UserRepository`) with file-backed implementation.
+- **Security Layer (`security`, `config`)**: JWT generation/parsing and security configuration.
+- **Exception Layer (`exception`)**: centralized API error mapping.
 
-## Getting started
-1. Install dependencies:
+Design principles used:
+- **Single Responsibility** via focused classes.
+- **Dependency Inversion** via interfaces and constructor injection.
+- **Open/Closed** through replaceable repository implementations.
+- **Immutability-first DTO/model style** with Java records.
+
+## Setup & Installation
+### Prerequisites
+- JDK 21+
+- Maven 3.9+
+
+### Run locally
+1. Clone repository.
+2. Ensure `data/users.json` exists (or let app create it automatically).
+3. Run:
    ```bash
-   npm install
+   mvn spring-boot:run
    ```
-2. Start the server (serves the static site and the API):
-   ```bash
-   npm start
-   ```
-   The server defaults to `http://localhost:3000`. Set `PORT` to override.
-3. Open the site in your browser at the server URL and navigate to **Booking** to try the auth flows.
+4. Open frontend: `http://localhost:3000/index.html`
 
-### Environment variables
-- `PORT`: Optional. Port for the Express server (defaults to `3000`).
-- `JWT_SECRET`: Optional. Secret for signing JWT tokens (defaults to a development string). Always override this in production.
+### Environment Variables
+- `PORT` (default: `3000`)
+- `JWT_SECRET` (required for real deployments; defaults only for local demo)
+- `USERS_FILE` (default: `data/users.json`)
 
-## API reference
-All endpoints are prefixed with `/api` and return JSON.
+## API Endpoints
+| Method | Endpoint | Description | Auth Required |
+|---|---|---|---|
+| POST | `/api/auth/signup` | Register a new user | No |
+| POST | `/api/auth/login` | Authenticate existing user | No |
+| GET | `/api/auth/me` | Validate token and return user claims | Yes (Bearer token) |
 
-### `POST /api/auth/signup`
-Create a new user.
-- Body: `{ "name": "string", "email": "string", "password": "string" }`
-- Success: `201` with `{ message, token, user }`.
-- Errors: `400` (missing fields) or `409` (email already exists).
-
-### `POST /api/auth/login`
-Authenticate an existing user.
-- Body: `{ "email": "string", "password": "string" }`
-- Success: `200` with `{ message, token, user }`.
-- Errors: `400` (missing fields) or `401` (invalid credentials).
-
-### `GET /api/auth/me`
-Protected route that validates the provided token.
-- Header: `Authorization: Bearer <token>`.
-- Success: `200` with `{ message, user }`.
-- Errors: `401` when the token is missing, expired, or invalid.
-
-## Data storage
-- User records are stored in `data/users.json`. The file is created automatically on first run.
-- Passwords are hashed with `bcryptjs`; only the hash is persisted.
-- The server uses `randomUUID` to generate unique user IDs.
-
-## Front-end integrations
-- `booking.html` contains sign-up and login forms plus a session status card. All controls call the Express API via `fetch`.
-- Tokens are saved to `localStorage` under the key `qs_token` so refreshing the page keeps you signed in.
-- The search, booking, and contact interactions remain unchanged; extra comments in `assets/app.js` describe each initializer.
-
-## Notes and recommendations
-- This demo is intentionally minimal. For production, add HTTPS, input rate limiting, password complexity checks, and persistent storage such as PostgreSQL or MongoDB.
-- Clear `data/users.json` to reset accounts while testing.
-- Replace `JWT_SECRET` with a strong, unique value before exposing the server publicly.
+## Testing & QA Assets
+- Unit and web layer tests are under `src/test/java`.
+- Postman collection is available at `postman/QuickStay-Auth-API.postman_collection.json`.
+- Run tests with:
+  ```bash
+  mvn test
+  ```
